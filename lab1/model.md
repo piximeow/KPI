@@ -18,7 +18,7 @@ erDiagram
         string first_name
         string last_name
         string email UK
-        string phone
+        string phone "необов'язковий"
         datetime registered_at
     }
 
@@ -40,41 +40,41 @@ erDiagram
         int product_id PK
         string product_name
         string sku UK
-        string description
-        decimal price
-        int stock_quantity
+        string description "необов'язковий"
+        decimal price "≥ 0"
+        int stock_quantity "≥ 0"
     }
 
     order {
         int order_id PK
         int address_id FK
-        string order_status
+        string order_status "new, paid, shipped, delivered, cancelled"
         datetime ordered_at
     }
 
     order_item {
         int order_item_id PK
         int order_id FK
-        int product_id FK
-        int quantity
-        decimal unit_price
+        int product_id FK "унікальна пара з order_id"
+        int quantity "≥ 1"
+        decimal unit_price "≥ 0, ціна на момент замовлення"
     }
 
     payment {
         int payment_id PK
         int order_id FK
-        string payment_method
-        string payment_status
-        decimal payment_amount
-        datetime paid_at
+        string payment_method "card, cash_on_delivery, bank_transfer"
+        string payment_status "pending, succeeded, failed, refunded"
+        decimal payment_amount "> 0"
+        datetime paid_at "необов'язковий"
     }
 
     review {
         int review_id PK
         int customer_id FK
-        int product_id FK
-        int rating
-        string review_text
+        int product_id FK "унікальна пара з customer_id"
+        int rating "1–5"
+        string review_text "необов'язковий"
         datetime reviewed_at
     }
 ```
