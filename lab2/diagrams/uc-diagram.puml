@@ -1,0 +1,54 @@
+@startuml uc-diagram
+' UC-діаграма «Онлайн-магазин» (lab2). Джерело правди: ../use-cases.md
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor<<обраний>> #FFF2CC
+  BorderColor<<обраний>> #B8860B
+}
+
+actor "Відвідувач" as Visitor
+actor "Гість" as Guest
+actor "Клієнт" as Client
+actor "Менеджер магазину" as Manager
+actor "Платіжний шлюз" as Gateway <<зовнішня система>>
+
+' узагальнення акторів: Гість і Клієнт — різновиди Відвідувача
+Visitor <|-- Guest
+Visitor <|-- Client
+
+rectangle "Онлайн-магазин" {
+  usecase "UC1 Переглянути каталог" as UC1
+  usecase "UC2 Знайти товар за назвою" as UC2
+  usecase "UC3 Сформувати кошик" as UC3
+  usecase "UC4 Зареєструватися" as UC4
+  usecase "UC5 Оформити замовлення\n--\nточки розширення:\nвибір способу оплати" as UC5 <<обраний>>
+  usecase "UC6 Вказати адресу доставки" as UC6
+  usecase "UC7 Оплатити замовлення карткою" as UC7
+  usecase "UC8 Керувати адресами" as UC8
+  usecase "UC9 Переглянути свої замовлення\n--\nточки розширення:\nнеоплачене замовлення" as UC9
+  usecase "UC10 Залишити відгук на товар" as UC10
+  usecase "UC11 Керувати каталогом" as UC11
+  usecase "UC12 Опрацювати замовлення" as UC12
+}
+
+Visitor --> UC1
+Visitor --> UC3
+Visitor --> UC5
+Guest --> UC4
+Client --> UC8
+Client --> UC9
+Client --> UC10
+Manager --> UC11
+Manager --> UC12
+
+UC2 .> UC1 : <<extend>>\n[введено пошуковий запит]
+UC5 .> UC6 : <<include>>
+UC8 .> UC6 : <<include>>
+UC7 .> UC5 : <<extend>>\n[обрано оплату карткою]
+UC7 .> UC9 : <<extend>>\n[замовлення new, оплата не succeeded]
+
+' шлюз ініціює повідомлення про результат оплати
+Gateway --> UC7
+@enduml
