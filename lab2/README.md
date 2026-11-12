@@ -11,9 +11,10 @@ lab2/
 │   ├── uc-diagram.puml         UC-діаграма (PlantUML)
 │   └── uc-diagram.svg          рендер
 ├── features/
-│   └── uc5-place-order.feature сценарії S1–S17 (Gherkin, вони ж user stories)
+│   └── uc5-place-order.feature сценарії S1–S24 (Gherkin, вони ж user stories)
 ├── requirements.md             константи, EARS, NFR, «Поза обсягом»
 ├── traceability.md             матриця вимога ↔ сценарій/UC
+├── audit.md                    мій підсумок аудиту: знайдено / прийнято / відхилено
 ├── DEFENSE.md                  точка входу для рев'ю
 ├── adr/
 │   ├── 0001-guest-checkout-via-guest-customer.md
