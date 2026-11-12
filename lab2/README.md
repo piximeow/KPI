@@ -11,12 +11,15 @@ lab2/
 │   ├── uc-diagram.puml         UC-діаграма (PlantUML)
 │   └── uc-diagram.svg          рендер
 ├── features/
-│   └── uc5-place-order.feature сценарії S1–S8 (Gherkin, вони ж user stories)
-├── requirements.md             EARS, NFR, «Поза обсягом»
+│   └── uc5-place-order.feature сценарії S1–S17 (Gherkin, вони ж user stories)
+├── requirements.md             константи, EARS, NFR, «Поза обсягом»
 ├── traceability.md             матриця вимога ↔ сценарій/UC
 ├── DEFENSE.md                  точка входу для рев'ю
-├── adr/                        рішення у форматі MADR
-└── ai/prompts.md               слід промптів і аудит виходу AI
+├── adr/
+│   ├── 0001-guest-checkout-via-guest-customer.md
+│   ├── 0002-gateway-result-is-source-of-truth.md
+│   └── 0003-card-payment-scenarios-inside-uc5.md
+└── ai/prompts.md               слід промптів з відповідями другого чату, топ-3 розбіжності, аудит виходу AI
 ```
 
 Рендер діаграми: `java -jar plantuml.jar -tsvg diagrams/uc-diagram.puml`.
