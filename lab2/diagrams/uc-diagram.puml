@@ -4,11 +4,14 @@ skinparam packageStyle rectangle
 skinparam actorStyle awesome
 
 actor "Клієнт" as C
-actor "Платіжний шлюз" as GW
+actor "Платіжний шлюз" as GW <<другорядний>>
 
 rectangle "Онлайн-магазин" {
   usecase "UC1. Переглянути каталог" as UC1
-  usecase "UC2. Оформити замовлення" as UC2
+  usecase UC2 as "UC2. Оформити замовлення
+--
+точки розширення:
+оплата"
   usecase "UC3. Вибрати адресу доставки" as UC3
   usecase "UC4. Оплатити карткою" as UC4
   usecase "UC5. Переглянути статус замовлення" as UC5
@@ -20,5 +23,5 @@ C --> UC5
 UC4 -- GW
 
 UC2 ..> UC3 : <<include>>
-UC4 ..> UC2 : <<extend>>\n[обрано card]
+UC4 ..> UC2 : <<extend>>\nоплата [обрано card]
 @enduml
