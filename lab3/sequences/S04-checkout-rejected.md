@@ -1,6 +1,6 @@
 # S04. Оформлення відхилено
 
-Сценарій: `@S4` у [`lab2/features/uc2-place-order.feature`](../../lab2/features/uc2-place-order.feature) · вимоги сценарію: REQ-02, REQ-06, REQ-07, REQ-08, REQ-09, REQ-19, REQ-20, REQ-22 · також: REQ-05 · рендер: [`svg/S04.svg`](svg/S04.svg)
+Сценарій: `@S4` у [`lab2/features/uc2-place-order.feature`](../../lab2/features/uc2-place-order.feature) · вимоги сценарію: REQ-02, REQ-06, REQ-07, REQ-08, REQ-09, REQ-19, REQ-20, REQ-22 · також: REQ-03, REQ-05 · кроки інтерфейсу поза lab2: disableConfirm(), enableConfirm() · рендер: [`svg/S04.svg`](svg/S04.svg)
 
 ```mermaid
 sequenceDiagram
@@ -39,7 +39,7 @@ sequenceDiagram
             CS->>CS: result = «Кошик порожній»
         else рядки 6, 7, 8, 9 — перевірки форми пройдено
             critical транзакція REQ-03–REQ-05 (REQ-06)
-                CS->>+PR: lockForUpdate(product_id)
+                CS->>+PR: lockForUpdate(product_id кожного товару кошика)
                 PR-->>-CS: price, stock_quantity кожного product
                 alt рядки 6, 8 — quantity > stock_quantity (REQ-07)
                     Note over CS: рядок 8: сума ще й 0.00, але REQ-07 перша

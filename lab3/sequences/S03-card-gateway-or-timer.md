@@ -13,10 +13,10 @@ sequenceDiagram
     participant OI as order_item
     participant PR as product
 
-    Note over GW,PR: Дано: order new, payment card pending 2400.00 створено о 12:00:00, stock_quantity «Навушники» = 3
+    Note over GW,PR: Дано: order new (ordered_at = 12:00:00), payment card pending 2400.00 створено в тій самій транзакції, stock_quantity «Навушники» = 3
     alt рядок 1 — о 12:05:00 шлюз повідомляє про відмову банку
         GW->>+PS: notifyPayment(payment_id, результат = failed, signature)
-        PS->>PS: verifySignature(body, signature) — дійсний
+        PS->>PS: verifySignature(body, signature) — дійсний (REQ-21)
         critical по одному для payment (REQ-16)
             PS->>+PA: findByIdForUpdate(payment_id)
             PA-->>-PS: payment_status = pending, order_id
@@ -58,7 +58,7 @@ sequenceDiagram
     else рядок 4 — о 12:15:00 шлюз повідомляє успіх, слідом спрацьовує таймер
         GW->>+PS: notifyPayment(payment_id, результат = succeeded, signature)
         PS->>PS: T = now() — час отримання повідомлення
-        PS->>PS: verifySignature(body, signature) — дійсний
+        PS->>PS: verifySignature(body, signature) — дійсний (REQ-21)
         critical по одному для payment (REQ-16)
             PS->>+PA: findByIdForUpdate(payment_id)
             PA-->>-PS: payment_status = pending, order_id

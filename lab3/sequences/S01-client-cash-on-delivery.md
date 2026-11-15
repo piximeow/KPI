@@ -1,6 +1,6 @@
 # S01. Клієнт оформлює замовлення з оплатою при отриманні
 
-Сценарій: `@S1` у [`lab2/features/uc2-place-order.feature`](../../lab2/features/uc2-place-order.feature) · вимоги сценарію: REQ-01, REQ-03, REQ-04, REQ-05, REQ-17, REQ-18 · також: REQ-06, REQ-22 · рендер: [`svg/S01.svg`](svg/S01.svg)
+Сценарій: `@S1` у [`lab2/features/uc2-place-order.feature`](../../lab2/features/uc2-place-order.feature) · вимоги сценарію: REQ-01, REQ-03, REQ-04, REQ-05, REQ-17, REQ-18 · також: REQ-06, REQ-07, REQ-08, REQ-09, REQ-19, REQ-20 · кроки інтерфейсу поза lab2: disableConfirm() · рендер: [`svg/S01.svg`](svg/S01.svg)
 
 ```mermaid
 sequenceDiagram
@@ -18,7 +18,8 @@ sequenceDiagram
     C->>+UI: натискає «Оформити»
     UI->>+CS: openCheckout(customer_id)
     CS->>+AD: findByCustomer(customer_id)
-    AD-->>-CS: [address «Київ»] — лише адреси цього customer
+    AD-->>-CS: [address «Київ»]
+    Note over AD: лише адреси цього customer, «Львів» не повертається
     CS-->>-UI: форма: address «Київ», payment_method card або cash_on_delivery
     UI-->>-C: форма (REQ-01)
     Note over PR: тим часом price «Навушники» стає 1300.00
@@ -26,10 +27,11 @@ sequenceDiagram
     UI->>UI: disableConfirm() — кошик у браузері, друге натискання неможливе
     UI->>+CS: confirmOrder(customer_id, address_id, payment_method = cash_on_delivery, кошик)
     CS->>+OR: countOrderedSince(ordered_at ≥ now − 60 с)
-    OR-->>-CS: менше 100 (REQ-20 не виконується)
+    OR-->>-CS: кількість order
+    Note over CS: менше 100 — REQ-20 не виконується
     CS->>CS: checkForm() — REQ-19, REQ-08 не виконуються
     critical транзакція REQ-03–REQ-05 (REQ-06)
-        CS->>+PR: lockForUpdate(product_id)
+        CS->>+PR: lockForUpdate(product_id кожного товару кошика)
         PR-->>-CS: price = 1300.00, stock_quantity = 5
         CS->>CS: checkStockAndTotal() — REQ-07, REQ-09 не виконуються
         CS->>+OR: insertOrder(order_status = new, ordered_at = now, address_id)
