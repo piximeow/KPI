@@ -3,8 +3,12 @@ left to right direction
 skinparam packageStyle rectangle
 skinparam actorStyle awesome
 
+actor "Відвідувач" as V
 actor "Клієнт" as C
+actor "Менеджер магазину" as M
 actor "Платіжний шлюз" as GW <<другорядний>>
+
+C -up-|> V
 
 rectangle "Онлайн-магазин" {
   usecase "UC1. Переглянути каталог" as UC1
@@ -15,11 +19,13 @@ rectangle "Онлайн-магазин" {
   usecase "UC3. Вибрати адресу доставки" as UC3
   usecase "UC4. Оплатити карткою" as UC4
   usecase "UC5. Переглянути статус замовлення" as UC5
+  usecase "UC6. Опрацювати замовлення" as UC6
 }
 
-C --> UC1
+V --> UC1
 C --> UC2
 C --> UC5
+M --> UC6
 UC4 -- GW
 
 UC2 ..> UC3 : <<include>>
