@@ -9,5 +9,9 @@ lab2/
 ├── diagrams/uc-diagram.puml, .svg  UC-діаграма (PlantUML)
 ├── features/uc2-place-order.feature  сценарії Gherkin (user stories)
 ├── requirements.md                 EARS і NFR
-└── traceability.md                 матриця вимога ↔ сценарій ↔ UC
+├── traceability.md                 матриця вимога ↔ сценарій ↔ UC
+├── audit.md                        аудит і топ-3 розбіжності
+├── DEFENSE.md                      точка входу для рев'ю
+├── adr/                            рішення (MADR)
+└── ai/prompts.md                   промпти, відповіді чату, топ-3 помилок AI
 ```
