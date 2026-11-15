@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="437px" preserveAspectRatio="none" style="width:1149px;height:437px;" version="1.1" viewBox="0 0 1149 437" width="1149px" zoomAndPan="magnify"><defs><filter height="300%" id="f17jz5cg3132xh" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--cluster Онлайн-магазин--><rect fill="#FFFFFF" filter="url(#f17jz5cg3132xh)" height="272" style="stroke: #000000; stroke-width: 1.5;" width="1042" x="96" y="107.6"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="119" x="557.5" y="123.1625">Онлайн-магазин</text><ellipse cx="252.0134" cy="165.4027" fill="#FEFECE" filter="url(#f17jz5cg3132xh)" rx="102.0134" ry="22.8027" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="179" x="162.5134" y="170.3724">UC1. Переглянути каталог</text><ellipse cx="651.2998" cy="287.36" fill="#FEFECE" filter="url(#f17jz5cg3132xh)" rx="109.2998" ry="24.26" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="195" x="553.7998" y="292.3297">UC2. Оформити замовлення</text><ellipse cx="1003.0061" cy="287.8012" fill="#FEFECE" filter="url(#f17jz5cg3132xh)" rx="119.0061" ry="26.2012" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="216" x="895.0061" y="292.7709">UC3. Вибрати адресу доставки</text><ellipse cx="252.1794" cy="245.7359" fill="#FEFECE" filter="url(#f17jz5cg3132xh)" rx="96.1794" ry="21.6359" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="166" x="169.1794" y="250.7056">UC4. Оплатити карткою</text><ellipse cx="252.1993" cy="332.5399" fill="#FEFECE" filter="url(#f17jz5cg3132xh)" rx="140.1993" ry="30.4399" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="261" x="121.6993" y="337.5096">UC5. Переглянути статус замовлення</text><!--entity C--><ellipse cx="27.5" cy="300.6" fill="#FEFECE" filter="url(#f17jz5cg3132xh)" rx="8" ry="8" style="stroke: #A80036; stroke-width: 2.0;"/><path d="M27.5,308.6 L27.5,335.6 M14.5,316.6 L40.5,316.6 M27.5,335.6 L14.5,350.6 M27.5,335.6 L40.5,350.6 " fill="none" filter="url(#f17jz5cg3132xh)" style="stroke: #A80036; stroke-width: 2.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="43" x="6" y="371.1625">Клієнт</text><!--entity GW--><ellipse cx="651.5" cy="17.6" fill="#FEFECE" filter="url(#f17jz5cg3132xh)" rx="8" ry="8" style="stroke: #A80036; stroke-width: 2.0;"/><path d="M651.5,25.6 L651.5,52.6 M638.5,33.6 L664.5,33.6 M651.5,52.6 L638.5,67.6 M651.5,52.6 L664.5,67.6 " fill="none" filter="url(#f17jz5cg3132xh)" style="stroke: #A80036; stroke-width: 2.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="114" x="594.5" y="88.1625">Платіжний шлюз</text><!--link C to UC1--><path d="M38.33,290.48 C46.94,262.76 62.21,227.8 88,206.6 C106.41,191.46 129.67,181.81 152.81,175.68 " fill="none" id="C-UC1" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="157.75,174.43,148.0427,172.7659,152.9035,175.6595,150.0099,180.5203,157.75,174.43" style="stroke: #A80036; stroke-width: 1.0;"/><!--link C to UC2--><path d="M49.12,355.11 C59.67,364.96 73.36,375.43 88,380.6 C215.4,425.58 258.9,403.81 392,380.6 C466.65,367.58 548.2,334.9 599.34,311.98 " fill="none" id="C-UC2" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="604.19,309.79,594.3413,309.8471,599.6328,311.8472,597.6328,317.1387,604.19,309.79" style="stroke: #A80036; stroke-width: 1.0;"/><!--link C to UC5--><path d="M49.03,332.6 C63.44,332.6 84.11,332.6 106.8,332.6 " fill="none" id="C-UC5" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="111.98,332.6,102.98,328.6,106.98,332.6,102.98,336.6,111.98,332.6" style="stroke: #A80036; stroke-width: 1.0;"/><!--link UC4 to GW--><path d="M319.65,230.24 C343,223.86 369.1,215.59 392,205.6 C465.5,173.51 543.48,124.06 594.33,89.46 " fill="none" id="UC4-GW" style="stroke: #A80036; stroke-width: 1.0;"/><!--link UC2 to UC3--><path d="M761.17,287.6 C798.47,287.6 840.48,287.6 878.84,287.6 " fill="none" id="UC2-UC3" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#A80036" points="883.99,287.6,874.99,283.6,878.99,287.6,874.99,291.6,883.99,287.6" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="61" x="792" y="284.1938">«include»</text><!--link UC4 to UC2--><path d="M339.25,254.71 C400.34,261.17 482.57,269.85 547.16,276.68 " fill="none" id="UC4-UC2" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#A80036" points="552.18,277.21,543.6533,272.2809,547.208,276.6814,542.8075,280.236,552.18,277.21" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="59" x="437.5" y="245.1938">«extend»</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="88" x="423" y="260.9232">[обрано card]</text><!--
+@startuml uc-diagram
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Клієнт" as C
+actor "Платіжний шлюз" as GW
+
+rectangle "Онлайн-магазин" {
+  usecase "UC1. Переглянути каталог" as UC1
+  usecase "UC2. Оформити замовлення" as UC2
+  usecase "UC3. Вибрати адресу доставки" as UC3
+  usecase "UC4. Оплатити карткою" as UC4
+  usecase "UC5. Переглянути статус замовлення" as UC5
+}
+
+C - -> UC1
+C - -> UC2
+C - -> UC5
+UC4 - - GW
+
+UC2 ..> UC3 : <<include>>
+UC4 ..> UC2 : <<extend>>\n[обрано card]
+@enduml
+
+PlantUML version 1.2019.06(Fri May 24 20:10:25 EEST 2019)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.12.1+1-1-24.04.4-Ubuntu
+Operating System: Linux
+OS Version: 6.18.44-fc-v470
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
