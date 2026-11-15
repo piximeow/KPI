@@ -1,29 +1,35 @@
 # Вимоги до UC2 «Оформити замовлення»
 
+Терміни («Оформити», «Підтвердити», «відхилити підтвердження», «поточний час») — у `spec.md`.
+
 ## EARS
 
 | ID | Вимога | Шаблон | Сутності lab1 |
 |----|--------|--------|---------------|
-| REQ-01 | WHEN Клієнт підтверджує замовлення, система SHALL створити `order` зі статусом `new`, `ordered_at` = поточний час і `address_id` обраної адреси. | WHEN | order, address |
-| REQ-02 | WHEN система створює `order`, система SHALL створити по одному `order_item` на кожен товар кошика з `quantity` з кошика і `unit_price` = поточна `product.price`. | WHEN | order_item, product |
-| REQ-03 | WHEN система створює `order_item`, система SHALL зменшити `stock_quantity` його `product` на `quantity`. | WHEN | product, order_item |
-| REQ-04 | IF `quantity` товару в кошику більша за його `stock_quantity`, THEN система SHALL не створювати `order` і показати Клієнту `product_name` і доступну кількість. | IF-THEN | product |
-| REQ-05 | WHEN система створює `order`, система SHALL створити `payment` зі статусом `pending`, обраним `payment_method` і `payment_amount` = сума `quantity` × `unit_price` усіх його `order_item`. | WHEN | payment, order_item |
-| REQ-06 | WHEN створено `payment` з `payment_method` = `card`, система SHALL перенаправити Клієнта на сторінку оплати Платіжного шлюзу з `payment_id` і `payment_amount`. | WHEN | payment |
-| REQ-07 | WHEN Платіжний шлюз повідомляє про успішну оплату `payment`, система SHALL встановити `payment_status` = `succeeded`, `paid_at` = час повідомлення і `order_status` = `paid`. | WHEN | payment, order |
-| REQ-08 | WHEN Платіжний шлюз повідомляє про відмову в оплаті `payment`, система SHALL встановити `payment_status` = `failed` і `order_status` = `cancelled`. | WHEN | payment, order |
-| REQ-09 | IF Платіжний шлюз не повідомив результат через 15 хв після створення `payment` з `card`, THEN система SHALL встановити `payment_status` = `failed` і `order_status` = `cancelled`. | IF-THEN | payment, order |
-| REQ-10 | WHEN система встановлює `order_status` = `cancelled`, система SHALL збільшити `stock_quantity` кожного товару на `quantity` його `order_item`. | WHEN | order, order_item, product |
-| REQ-11 | WHEN Клієнт натискає «Оформити замовлення», система SHALL показати список `address` цього `customer` для вибору. | WHEN | customer, address |
+| REQ-01 | WHEN Клієнт натискає «Оформити», система SHALL показати форму зі списком `address` цього `customer` і способами оплати `card` та `cash_on_delivery`. | WHEN | customer, address, payment |
+| REQ-02 | IF у `customer` немає жодної `address`, THEN система SHALL замість форми показати повідомлення «Додайте адресу доставки в профілі». | IF-THEN | customer, address |
+| REQ-03 | WHEN Клієнт натискає «Підтвердити» і жодна умова REQ-07–REQ-09 не виконується, система SHALL створити `order` зі статусом `new`, `ordered_at` = поточний час, `address_id` обраної адреси і по одному `order_item` на кожен товар кошика з `quantity` з кошика та `unit_price` = `price` на момент натискання. | WHEN | order, order_item, product, address |
+| REQ-04 | WHEN система створює `order`, система SHALL створити `payment` зі статусом `pending`, обраним `payment_method` і `payment_amount` = сума `quantity` × `unit_price` його `order_item`. | WHEN | payment, order_item |
+| REQ-05 | WHEN система створює `order_item`, система SHALL зменшити `stock_quantity` його `product` на `quantity`. | WHEN | product, order_item |
+| REQ-06 | Система SHALL виконувати REQ-03–REQ-05 для одного підтвердження в одній транзакції: якщо будь-яка з них не вдалася, підтвердження відхиляється. | ubiquitous | order, order_item, payment, product |
+| REQ-07 | IF `quantity` хоча б одного товару кошика більша за його `stock_quantity`, THEN система SHALL відхилити підтвердження з повідомленням, що містить `product_name` і `stock_quantity` кожного такого товару. | IF-THEN | product |
+| REQ-08 | IF кошик порожній, THEN система SHALL відхилити підтвердження з повідомленням «Кошик порожній». | IF-THEN | order (1..N позицій) |
+| REQ-09 | IF сума `quantity` × `price` усіх товарів кошика дорівнює 0.00, THEN система SHALL відхилити підтвердження з повідомленням «Замовлення на 0.00 грн не оформлюється». | IF-THEN | payment (`payment_amount > 0`) |
+| REQ-10 | WHEN система створює `payment` з `payment_method` = `card`, система SHALL перенаправити Клієнта на сторінку оплати Платіжного шлюзу, передавши `payment_id` і `payment_amount`. | WHEN | payment |
+| REQ-11 | WHEN Платіжний шлюз повідомляє про успішну оплату `payment` у статусі `pending`, система SHALL перевести `payment` у `succeeded` з `paid_at` = час отримання повідомлення, а його `order` — у `paid`. | WHEN | payment, order |
+| REQ-12 | WHEN Платіжний шлюз повідомляє про відмову в оплаті `payment` у статусі `pending`, система SHALL перевести `payment` у `failed`, а його `order` — у `cancelled`. | WHEN | payment, order |
+| REQ-13 | IF `payment` з `card` має статус `pending` через 15 хв після створення, THEN система SHALL не пізніше ніж через 16 хв після створення перевести `payment` у `failed`, а його `order` — у `cancelled`. | IF-THEN | payment, order |
+| REQ-14 | WHEN система скасовує `order` за REQ-12 або REQ-13, система SHALL збільшити `stock_quantity` кожного товару на `quantity` його `order_item`. | WHEN | order, order_item, product |
+| REQ-15 | IF Платіжний шлюз повідомляє результат для `payment`, статус якого вже не `pending`, THEN система SHALL не змінювати `payment`, `order` і `stock_quantity`. | IF-THEN | payment, order, product |
 
-Зв'язки на діаграмі: `include` UC2 → UC3 тримається на REQ-11; `extend` UC4 → UC2 [обрано `card`] — на REQ-06–REQ-09.
+Перевірки REQ-07–REQ-09 виконуються під час натискання «Підтвердити», до створення `order`. Зв'язки на діаграмі: `include` UC2 → UC3 тримається на REQ-01 і REQ-02; `extend` UC4 → UC2 [обрано `card`] — на REQ-10–REQ-15.
 
 ## NFR
 
 | ID | Тема | Вимога |
 |----|------|--------|
-| NFR-01 | Пристрої й браузери | Оформлення працює в останніх двох версіях Chrome, Firefox, Safari, Edge на екранах шириною від 360 до 1920 px. |
-| NFR-02 | Мова | Увесь текст оформлення — українською; суми в гривнях з двома знаками після коми (`2400.00 грн`). |
-| NFR-03 | Час відгуку | p95 від підтвердження до показу номера `order` ≤ 2 с при 50 одночасних оформленнях, кошик до 20 позицій, вимір на сервері протягом 10 хв. |
-| NFR-04 | Навантаження | Система обробляє 100 оформлень на хвилину; понад цю межу нові запити отримують повідомлення «Спробуйте за хвилину», уже розпочаті — завершуються. |
-| NFR-05 | Безпека | Дані картки не зберігаються в системі — їх вводять лише на сторінці шлюзу; повідомлення шлюзу без дійсного підпису відхиляються; обмін — лише HTTPS. |
+| NFR-01 | Пристрої й браузери | Сценарії S1–S5 проходять в останніх двох версіях (станом на дату тесту) Chrome, Firefox, Edge, Safari на macOS та iOS при ширині екрана 360, 768 і 1920 px. |
+| NFR-02 | Мова | Усі сторінки магазину в UC2 (крім сторінки шлюзу) — українською, зокрема назви статусів; суми — у гривнях з двома знаками після коми (`2400.00 грн`). Назви товарів показуються як у `product_name`. |
+| NFR-03 | Час відгуку | p95 від натискання «Підтвердити» до показу номера `order` (S1) або початку перенаправлення на шлюз (S2) ≤ 2 с. Умови: вимір у браузері, 50 віртуальних клієнтів безперервно оформлюють замовлення 10 хв, кошик до 20 позицій, у БД 10 000 товарів. |
+| NFR-04 | Навантаження | Система приймає до 100 підтверджень на хвилину (ковзне вікно на всю систему) протягом 30 хв, p95 ≤ 3 с. Понад межу нове підтвердження відхиляється з повідомленням «Забагато замовлень, спробуйте за хвилину», кошик Клієнта лишається без змін. |
+| NFR-05 | Безпека | Номер картки й CVV не з'являються в БД, журналах і запитах до сервера магазину; повідомлення шлюзу без дійсного підпису HMAC-SHA256 відхиляються без змін даних; обмін — лише HTTPS з TLS ≥ 1.2. |
