@@ -1,6 +1,6 @@
 # S05. Повідомлення шлюзу нічого не змінює
 
-Сценарій: `@S5` у [`lab2/features/uc2-place-order.feature`](../../lab2/features/uc2-place-order.feature) · вимоги: REQ-15, REQ-16, REQ-21 · рендер: [`svg/S05.svg`](svg/S05.svg)
+Сценарій: `@S5` у [`lab2/features/uc2-place-order.feature`](../../lab2/features/uc2-place-order.feature) · вимоги сценарію: REQ-15, REQ-16, REQ-21 · рендер: [`svg/S05.svg`](svg/S05.svg)
 
 ```mermaid
 sequenceDiagram
@@ -10,21 +10,25 @@ sequenceDiagram
     participant PA as payment
 
     Note over GW,PA: Дано: стан order, payment і paid_at із рядка «Приклади» S5
-    GW->>+PS: notifyPayment(paymentId, результат, signature)
+    GW->>+PS: notifyPayment(payment_id, результат, signature)
     PS->>PS: verifySignature(body, signature) — HMAC-SHA256
-    alt підпис недійсний (REQ-21)
-        PS-->>GW: 401 — payment і order не змінено
-    else підпис дійсний
+    alt рядок 4 — підпис недійсний, payment pending (REQ-21)
+        PS->>PS: result = Rejected(підпис недійсний)
+        Note over PS,PA: payment і order не читаються й не змінюються
+    else рядки 1–3 — підпис дійсний
         critical по одному для payment (REQ-16)
-            PS->>+PA: findByIdForUpdate(paymentId)
+            PS->>+PA: findByIdForUpdate(payment_id)
             PA-->>-PS: payment_status, paid_at
-            alt payment_status = pending
-                Note over PS: обробка як у S02 або S03
-            else failed або succeeded (REQ-15)
-                Note over PS: payment, order і stock_quantity не змінюються
+            alt рядок 1 — failed, order cancelled, шлюз «оплату підтверджено»
+                Note over PS: payment уже не pending — нічого не змінюється (REQ-15)
+            else рядок 2 — succeeded, order paid, шлюз «банк відхилив»
+                Note over PS: payment уже не pending — нічого не змінюється (REQ-15)
+            else рядок 3 — succeeded, order paid, шлюз «оплату підтверджено»
+                Note over PS: повтор того самого результату — нічого не змінюється (REQ-15)
             end
+            PS->>PS: commit()
         end
-        PS-->>GW: 200 OK
+        PS->>PS: result = Accepted
     end
-    deactivate PS
+    PS-->>-GW: result
 ```

@@ -1,6 +1,6 @@
 # S04. Оформлення відхилено
 
-Сценарій: `@S4` у [`lab2/features/uc2-place-order.feature`](../../lab2/features/uc2-place-order.feature) · вимоги: REQ-02, REQ-06, REQ-07, REQ-08, REQ-09, REQ-19, REQ-20, REQ-22 · рендер: [`svg/S04.svg`](svg/S04.svg)
+Сценарій: `@S4` у [`lab2/features/uc2-place-order.feature`](../../lab2/features/uc2-place-order.feature) · вимоги сценарію: REQ-02, REQ-06, REQ-07, REQ-08, REQ-09, REQ-19, REQ-20, REQ-22 · також: REQ-05 · рендер: [`svg/S04.svg`](svg/S04.svg)
 
 ```mermaid
 sequenceDiagram
@@ -14,46 +14,56 @@ sequenceDiagram
     participant OI as order_item
     participant PA as payment
 
-    Note over C,PA: Дано: стан із рядка «Приклади» S4. Перевірки в порядку REQ-22, показується перша, що виконалась
-    alt «Оформити», у customer немає address (REQ-02)
-        C->>UI: натискає «Оформити»
-        UI->>+CS: openCheckout(customerId)
-        CS->>+AD: findByCustomer(customerId)
+    Note over C,PA: Дано: стан із рядка «Приклади» S4 (номер рядка — у гілці)
+    alt рядок 1 — «Оформити», у customer немає address (REQ-02)
+        C->>+UI: натискає «Оформити»
+        UI->>+CS: openCheckout(customer_id)
+        CS->>+AD: findByCustomer(customer_id)
         AD-->>-CS: []
         CS-->>-UI: NoAddress
-        UI-->>C: «Додайте адресу доставки в профілі»
-    else «Підтвердити»
-        C->>UI: натискає «Підтвердити»
-        UI->>+CS: confirmOrder(customerId, addressId?, payment_method?, кошик)
+        UI-->>-C: «Додайте адресу доставки в профілі»
+    else рядки 2–11 — «Підтвердити»
+        C->>+UI: натискає «Підтвердити»
+        UI->>UI: disableConfirm()
+        UI->>+CS: confirmOrder(customer_id, address_id, payment_method, кошик)
+        Note over CS: умови перевіряються в порядку REQ-22, береться перша, що виконалась
         CS->>+OR: countOrderedSince(ordered_at ≥ now − 60 с)
         OR-->>-CS: кількість order
-        alt вже 100 order за 60 с (REQ-20)
-            CS-->>UI: Refused(«Забагато замовлень, спробуйте за хвилину»)
-        else не обрано address або спосіб оплати (REQ-19)
-            CS-->>UI: Refused(«Оберіть адресу й спосіб оплати»)
-        else кошик порожній (REQ-08)
-            CS-->>UI: Refused(«Кошик порожній»)
-        else перевірки форми пройдено
+        alt рядки 10, 11 — уже 100 order за 60 с (REQ-20)
+            Note over CS: рядок 11: не обрано й форму, але REQ-20 перша
+            CS->>CS: result = «Забагато замовлень, спробуйте за хвилину»
+        else рядки 2, 3, 4 — не обрано address або спосіб оплати (REQ-19)
+            Note over CS: рядок 4: ще й кошик порожній, але REQ-19 перша
+            CS->>CS: result = «Оберіть адресу й спосіб оплати»
+        else рядок 5 — кошик порожній (REQ-08)
+            CS->>CS: result = «Кошик порожній»
+        else рядки 6, 7, 8, 9 — перевірки форми пройдено
             critical транзакція REQ-03–REQ-05 (REQ-06)
-                CS->>+PR: lockForUpdate(productIds)
+                CS->>+PR: lockForUpdate(product_id)
                 PR-->>-CS: price, stock_quantity кожного product
-                alt quantity > stock_quantity хоча б для одного (REQ-07)
-                    CS-->>UI: Refused(«product_name: доступно N шт.» для кожного)
-                else сума quantity × price = 0.00 (REQ-09)
-                    CS-->>UI: Refused(«Замовлення на 0.00 грн не оформлюється»)
-                else збій під час створення (REQ-06)
-                    CS->>+OR: insertOrder(new, ordered_at, addressId)
-                    OR-->>-CS: orderId
-                    CS->>+OI: insertOrderItem(orderId, productId, quantity, unit_price)
-                    OI-->>-CS: orderItemId
-                    CS->>+PA: insertPayment(orderId, cash_on_delivery, pending, сума)
+                alt рядки 6, 8 — quantity > stock_quantity (REQ-07)
+                    Note over CS: рядок 8: сума ще й 0.00, але REQ-07 перша
+                    CS->>CS: rollback()
+                    CS->>CS: result = «product_name: доступно stock_quantity шт.» для кожного
+                else рядок 7 — сума quantity × price = 0.00 (REQ-09)
+                    CS->>CS: rollback()
+                    CS->>CS: result = «Замовлення на 0.00 грн не оформлюється»
+                else рядок 9 — перевірки пройдено, під час insertPayment збій БД
+                    CS->>+OR: insertOrder(order_status = new, ordered_at = now, address_id)
+                    OR-->>-CS: order_id
+                    CS->>+OI: insertOrderItem(order_id, product_id, quantity = 2, unit_price = 1200.00)
+                    OI-->>-CS: order_item_id
+                    CS->>+PR: decreaseStock(product_id, quantity = 2)
+                    PR-->>-CS: stock_quantity = 3
+                    CS->>+PA: insertPayment(order_id, payment_method = cash_on_delivery, payment_status = pending, payment_amount = 2400.00)
                     PA-->>-CS: помилка БД
-                    CS->>CS: rollback() — нічого не зберігається
-                    CS-->>UI: Refused(«Не вдалося оформити замовлення, спробуйте ще раз»)
+                    CS->>CS: rollback() — order, order_item і decreaseStock скасовано
+                    CS->>CS: result = «Не вдалося оформити замовлення, спробуйте ще раз»
                 end
             end
         end
-        deactivate CS
-        UI-->>C: показує повідомлення, кошик не змінює
+        CS-->>-UI: Refused(result)
+        UI->>UI: enableConfirm() — кошик не змінено
+        UI-->>-C: показує повідомлення result
     end
 ```
