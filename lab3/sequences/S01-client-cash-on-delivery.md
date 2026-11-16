@@ -22,7 +22,7 @@ sequenceDiagram
     Note over AD: лише адреси цього customer, «Львів» не повертається
     CS-->>-UI: форма: address «Київ», payment_method card або cash_on_delivery
     UI-->>-C: форма (REQ-01)
-    Note over PR: тим часом price «Навушники» стає 1300.00
+    Note over PR: тим часом поза UC2 магазин змінює price «Навушники» на 1300.00
     C->>+UI: обирає address «Київ» і cash_on_delivery, натискає «Підтвердити»
     UI->>UI: disableConfirm() — кошик у браузері, друге натискання неможливе
     UI->>+CS: confirmOrder(customer_id, address_id, payment_method = cash_on_delivery, кошик)

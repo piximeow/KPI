@@ -9,12 +9,12 @@ sequenceDiagram
     participant PS as PaymentService
     participant PA as payment
 
-    Note over GW,PA: Дано: стан order, payment і paid_at із рядка «Приклади» S5
+    Note over GW,PA: Дано: order, його payment з методом card, payment_status, paid_at і stock_quantity «Навушники» із рядка «Приклади» S5. Підпис перевіряється першим (REQ-21), тому рядок 4 іде першою гілкою
     GW->>+PS: notifyPayment(payment_id, результат, signature)
     PS->>PS: verifySignature(body, signature) — HMAC-SHA256
     alt рядок 4 — підпис недійсний, payment pending (REQ-21)
         PS->>PS: result = Rejected(підпис недійсний)
-        Note over PS,PA: payment і order не читаються й не змінюються
+        Note over PS,PA: payment, order і stock_quantity не читаються й не змінюються
     else рядки 1–3 — підпис дійсний
         critical по одному для payment (REQ-16)
             PS->>+PA: findByIdForUpdate(payment_id)
@@ -26,6 +26,7 @@ sequenceDiagram
             else рядок 3 — succeeded, order paid, шлюз «оплату підтверджено»
                 Note over PS: повтор того самого результату — нічого не змінюється (REQ-15)
             end
+            Note over PS,PA: payment, paid_at, order і stock_quantity — як у «Дано»
             PS->>PS: commit()
         end
         PS->>PS: result = Accepted

@@ -13,7 +13,7 @@ sequenceDiagram
     participant OI as order_item
     participant PR as product
 
-    Note over GW,PR: Дано: order new (ordered_at = 12:00:00), payment card pending 2400.00 створено в тій самій транзакції, stock_quantity «Навушники» = 3
+    Note over GW,PR: Дано: order new (ordered_at = 12:00:00) з order_item: 2 шт. «Навушники», payment card pending 2400.00 створено в тій самій транзакції, stock_quantity «Навушники» = 3
     alt рядок 1 — о 12:05:00 шлюз повідомляє про відмову банку
         GW->>+PS: notifyPayment(payment_id, результат = failed, signature)
         PS->>PS: verifySignature(body, signature) — дійсний (REQ-21)
