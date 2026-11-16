@@ -1,6 +1,6 @@
 # S02. Клієнт оплачує замовлення карткою
 
-Сценарій: `@S2` у [`lab2/features/uc2-place-order.feature`](../../lab2/features/uc2-place-order.feature) · вимоги сценарію: REQ-03, REQ-04, REQ-10, REQ-11 · також: REQ-01, REQ-05, REQ-06, REQ-07, REQ-08, REQ-09, REQ-13, REQ-16, REQ-17, REQ-19, REQ-20, REQ-21 · кроки інтерфейсу поза lab2: disableConfirm(), кроки шлюзу: Клієнт вводить дані картки, шлюз показує сторінку результату (UC5, поза lab2) · рендер: [`svg/S02.svg`](svg/S02.svg)
+Сценарій: `@S2` у [`lab2/features/uc2-place-order.feature`](../../lab2/features/uc2-place-order.feature) · вимоги сценарію: REQ-03, REQ-04, REQ-10, REQ-11 · також: REQ-01, REQ-05, REQ-06, REQ-07, REQ-08, REQ-09, REQ-13, REQ-16, REQ-17, REQ-19, REQ-20, REQ-21 · кроки поза lab2: disableConfirm(), Клієнт вводить дані картки на сторінці шлюзу, шлюз показує сторінку результату · рендер: [`svg/S02.svg`](svg/S02.svg)
 
 ```mermaid
 sequenceDiagram
@@ -54,7 +54,7 @@ sequenceDiagram
     UI-->>-C: перенаправлення на сторінку шлюзу з payment_id і 2400.00 (REQ-10)
     C->>+GW: вводить дані картки на сторінці шлюзу
     GW-->>-C: сторінка результату оплати
-    Note over C,GW: що бачить Клієнт після шлюзу — UC5, поза lab2. Порядок цієї відповіді й повідомлення магазину lab2 не задає
+    Note over C,GW: сторінку результату показує сам шлюз. Що Клієнт бачить у магазині після повернення — UC5, поза lab2. Порядок цієї відповіді й повідомлення магазину lab2 не задає
     GW->>+PS: notifyPayment(payment_id, результат = succeeded, signature)
     PS->>PS: T = now() — час отримання повідомлення
     PS->>PS: verifySignature(body, signature) — HMAC-SHA256, дійсний (REQ-21)

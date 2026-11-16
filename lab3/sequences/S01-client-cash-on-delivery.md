@@ -1,6 +1,6 @@
 # S01. Клієнт оформлює замовлення з оплатою при отриманні
 
-Сценарій: `@S1` у [`lab2/features/uc2-place-order.feature`](../../lab2/features/uc2-place-order.feature) · вимоги сценарію: REQ-01, REQ-03, REQ-04, REQ-05, REQ-17, REQ-18 · також: REQ-06, REQ-07, REQ-08, REQ-09, REQ-19, REQ-20 · кроки інтерфейсу поза lab2: disableConfirm() · рендер: [`svg/S01.svg`](svg/S01.svg)
+Сценарій: `@S1` у [`lab2/features/uc2-place-order.feature`](../../lab2/features/uc2-place-order.feature) · вимоги сценарію: REQ-01, REQ-03, REQ-04, REQ-05, REQ-17, REQ-18 · також: REQ-06, REQ-07, REQ-08, REQ-09, REQ-19, REQ-20 · кроки поза lab2: disableConfirm() · рендер: [`svg/S01.svg`](svg/S01.svg)
 
 ```mermaid
 sequenceDiagram
