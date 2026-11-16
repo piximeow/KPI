@@ -9,7 +9,7 @@ sequenceDiagram
     participant PS as PaymentService
     participant PA as payment
 
-    Note over GW,PA: Дано: order, його payment з методом card, payment_status, paid_at і stock_quantity «Навушники» із рядка «Приклади» S5. Підпис перевіряється першим (REQ-21), тому рядок 4 іде першою гілкою
+    Note over GW,PA: Дано: order на address «Київ» з order_item 2 шт. «Навушники», його payment card 2400.00, payment_status, paid_at і stock_quantity із рядка «Приклади» S5. Підпис перевіряється першим (REQ-21), тому рядок 4 іде першою гілкою. Відповідь Accepted = «прийнято», Rejected = «відмова»
     GW->>+PS: notifyPayment(payment_id, результат, signature)
     PS->>PS: verifySignature(body, signature) — HMAC-SHA256
     alt рядок 4 — підпис недійсний, payment pending (REQ-21)

@@ -13,7 +13,7 @@ sequenceDiagram
     participant OI as order_item
     participant PR as product
 
-    Note over GW,PR: Дано: order new (ordered_at = 12:00:00) з order_item: 2 шт. «Навушники», payment card pending 2400.00 створено в тій самій транзакції, stock_quantity «Навушники» = 3
+    Note over GW,PR: Дано: order new (ordered_at = 12:00:00) на address «Київ» з order_item: 2 шт. «Навушники», payment card pending 2400.00, paid_at порожній, створено в тій самій транзакції, stock_quantity «Навушники» = 3
     alt рядок 1 — о 12:05:00 шлюз повідомляє про відмову банку
         GW->>+PS: notifyPayment(payment_id, результат = failed, signature)
         PS->>PS: verifySignature(body, signature) — дійсний (REQ-21)
@@ -33,8 +33,9 @@ sequenceDiagram
             PS->>PS: commit()
         end
         PS-->>-GW: Accepted
+        Note over GW,PR: payment failed, paid_at порожній, order cancelled, stock_quantity = 5
     else рядок 2 — настає 12:14:59 без повідомлення шлюзу
-        Note over TM,PR: таймер ще не спрацював: payment pending, order new, stock_quantity = 3
+        Note over TM,PR: таймер ще не спрацював: payment pending, paid_at порожній, order new, stock_quantity = 3
     else рядок 3 — настає 12:16:00 без повідомлення шлюзу
         Note over TM: таймер спрацьовує між 12:15:00 і 12:16:00 (REQ-13)
         TM-)+PS: onPaymentTimeout(payment_id)
@@ -54,7 +55,7 @@ sequenceDiagram
             PS->>PS: commit()
         end
         deactivate PS
-        Note over TM,PR: о 12:16:00 payment failed, order cancelled, stock_quantity = 5
+        Note over TM,PR: о 12:16:00 payment failed, paid_at порожній, order cancelled, stock_quantity = 5
     else рядок 4 — о 12:15:00 шлюз повідомляє успіх, слідом спрацьовує таймер
         GW->>+PS: notifyPayment(payment_id, результат = succeeded, signature)
         PS->>PS: T = now() — час отримання повідомлення
@@ -69,6 +70,7 @@ sequenceDiagram
             PS->>PS: commit()
         end
         PS-->>-GW: Accepted
+        Note over GW,PR: payment succeeded, paid_at = 12:15:00, order paid, stock_quantity = 3
         TM-)+PS: onPaymentTimeout(payment_id)
         critical по одному для payment (REQ-16)
             PS->>+PA: findByIdForUpdate(payment_id)

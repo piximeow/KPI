@@ -43,7 +43,7 @@ sequenceDiagram
             CS->>+PR: decreaseStock(product_id, quantity = 2)
             PR-->>-CS: stock_quantity = 3
         end
-        CS->>+PA: insertPayment(order_id, payment_method = card, payment_status = pending, payment_amount = 2400.00)
+        CS->>+PA: insertPayment(order_id, payment_method = card, payment_status = pending, payment_amount = 2400.00, paid_at = порожній)
         PA-->>-CS: payment_id
         CS-)TM: schedule(payment_id, ordered_at + 15 хв) (REQ-13)
         Note over CS,TM: у payment немає часу створення, тому відлік — від ordered_at, тієї самої транзакції. Якщо commit не вдасться, таймер не знайде payment і нічого не змінить (adr/0002)
