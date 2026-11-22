@@ -1,23 +1,23 @@
 @startuml process
 title Оформлення й оплата замовлення (UC2 + UC4)
 
-|Клієнт|
+|Клієнт (CheckoutUI)|
 start
 :openCheckout(customer_id)>
 |Магазин|
 :findByCustomer — address цього customer;
 if (є хоча б одна address?) then (ні)
   :NoAddress>
-  note right: «Додайте адресу доставки в профілі» (REQ-02)
-  |Клієнт|
+  note right: «Додайте адресу доставки в профілі»
+  |Клієнт (CheckoutUI)|
   stop
 else (так)
   |Магазин|
-  :форма: address, card або cash_on_delivery>
+  :форма: address, card / cash_on_delivery>
 endif
 repeat
-  |Клієнт|
-  if (Клієнт натискає «Підтвердити»?) then (ні, закриває форму)
+  |Клієнт (CheckoutUI)|
+  if (натискає «Підтвердити»?) then (ні, закриває форму)
     :нічого не створено;
     stop
   else (так)
@@ -25,9 +25,8 @@ repeat
     payment_method, кошик)>
   endif
   |Магазин|
-  :перевірки в порядку REQ-22:
-  ліміт, форма, кошик;
-  if (виконалась умова відмови?) then (так)
+  :перевірки REQ-22: ліміт, форма, кошик;
+  if (умова відмови?) then (так)
     :Refused(текст першої умови)>
     note right
       REQ-20 «Забагато замовлень, спробуйте за хвилину»
@@ -35,8 +34,8 @@ repeat
       REQ-08 «Кошик порожній»
     end note
   else (ні)
-    :транзакція: lockForUpdate товарів кошика;
-    if (бракує товару або сума 0.00?) then (так)
+    :транзакція: lockForUpdate товарів;
+    if (бракує товару / сума 0.00?) then (так)
       :rollback;
       :Refused(текст першої умови)>
       note right
@@ -45,14 +44,10 @@ repeat
       end note
     else (ні)
       :order (new), order_item, −stock_quantity,
-      payment (pending) — REQ-03-REQ-05;
-      if (payment_method = card?) then (так)
-        :schedule(payment_id, ordered_at + 15 хв)>
-      else (ні)
-      endif
-      if (збій запису в БД (REQ-06)?) then (так)
-        :rollback — нічого не збережено,
-        таймер не знайде payment;
+      payment (pending), для card — schedule
+      (payment_id, ordered_at + 15 хв);
+      if (збій запису в БД?) then (так)
+        :rollback — нічого не збережено;
         :Refused>
         note right: «Не вдалося оформити замовлення, спробуйте ще раз»
       else (ні)
@@ -60,54 +55,57 @@ repeat
       endif
     endif
   endif
-repeat while (Refused?) is (так — форма лишається, enableConfirm) not (ні — замовлення створено)
-|Магазин|
-if (payment_method?) then (cash_on_delivery)
+repeat while (Refused?) is (так — форма лишається) not (ні)
+fork
+  :OrderCreated(order_id; для card ще
+  payment_id, payment_amount)>
+  |Клієнт (CheckoutUI)|
   fork
     :clearCart (REQ-17);
   fork again
-    :номер замовлення order_id (REQ-18)>
+    if (payment_method?) then (cash_on_delivery)
+      :показати номер order_id (REQ-18);
+    else (card)
+      :перехід на сторінку шлюзу
+      (payment_id, payment_amount) (REQ-10)>
+    endif
   end fork
-  |Клієнт|
-  stop
-else (card)
+  end
+fork again
   |Магазин|
-  fork
-    :clearCart (REQ-17);
-  fork again
-    :перенаправлення Клієнта на шлюз
-    (payment_id, payment_amount) (REQ-10)>
-  end fork
-endif
-repeat
-  if (яка подія надійшла?) then (від шлюзу)
-    |Платіжний шлюз|
-    :notifyPayment(payment_id, результат, signature)>
-    |Магазин|
-    :notifyPayment<
-    if (підпис дійсний (REQ-21)?) then (ні)
-      :Rejected(підпис недійсний), дані без змін>
-    elseif (payment ще pending?) then (ні)
-      :Accepted, дані без змін (REQ-15)>
-    elseif (результат?) then (succeeded)
-      :payment → succeeded, paid_at = час отримання,
-      order → paid (REQ-11);
-      :Accepted>
-    else (failed — банк відхилив)
-      :payment → failed, order → cancelled,
-      повернути stock_quantity (REQ-12, REQ-14);
-      :Accepted>
-    endif
-  else (від таймера)
-    |Магазин|
-    :onPaymentTimeout(payment_id)<
-    if (payment ще pending?) then (так)
-      :payment → failed, order → cancelled,
-      повернути stock_quantity (REQ-13, REQ-14);
-    else (ні)
-      :нічого не змінювати;
-    endif
+  if (payment_method?) then (card)
+    repeat
+      if (яка подія надійшла?) then (від шлюзу)
+        |Платіжний шлюз|
+        :notifyPayment(payment_id, результат, signature)>
+        |Магазин|
+        :notifyPayment<
+        if (підпис дійсний (REQ-21)?) then (ні)
+          :Rejected(підпис недійсний), без змін>
+        elseif (payment ще pending?) then (ні)
+          :Accepted, без змін (REQ-15)>
+        elseif (результат?) then (succeeded)
+          :payment → succeeded, paid_at,
+          order → paid (REQ-11);
+          :Accepted>
+        else (failed)
+          :payment → failed, order → cancelled,
+          +stock_quantity (REQ-12, 14);
+          :Accepted>
+        endif
+      else (від таймера)
+        :onPaymentTimeout(payment_id)<
+        if (payment ще pending?) then (так)
+          :payment → failed, order → cancelled,
+          +stock_quantity (REQ-13, 14);
+        else (ні)
+          :без змін;
+        endif
+      endif
+    repeat while (onPaymentTimeout ще не надходив?) is (так) not (ні)
+  else (cash_on_delivery)
+    end
   endif
-repeat while (onPaymentTimeout ще не надходив?) is (так) not (ні)
+end fork
 stop
 @enduml
