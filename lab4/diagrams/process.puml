@@ -7,55 +7,61 @@ start
 |Магазин|
 :findByCustomer — address цього customer;
 if (є хоча б одна address?) then (ні)
-  :NoAddress «Додайте адресу доставки в профілі»>
+  :NoAddress>
+  note right: «Додайте адресу доставки в профілі» (REQ-02)
   |Клієнт|
   stop
 else (так)
   |Магазин|
   :форма: address, card або cash_on_delivery>
 endif
-|Клієнт|
-if (Клієнт натискає «Підтвердити»?) then (ні, закриває форму)
-  :нічого не створено;
-  stop
-else (так)
-  :confirmOrder(address_id, payment_method, кошик)>
-endif
-|Магазин|
-:перевірки в порядку REQ-22:
-ліміт (REQ-20), форма (REQ-19), кошик (REQ-08);
-if (виконалась умова відмови?) then (так)
-  :Refused(повідомлення першої умови)>
+repeat
   |Клієнт|
-  stop
-else (ні)
-endif
-|Магазин|
-:транзакція: lockForUpdate товарів кошика;
-if (бракує товару (REQ-07) або сума 0.00 (REQ-09)?) then (так)
-  :rollback;
-  :Refused(повідомлення першої умови)>
-  |Клієнт|
-  stop
-else (ні)
-endif
-|Магазин|
-:order (new), order_item, −stock_quantity,
-payment (pending) — REQ-03-REQ-05;
-if (payment_method = card?) then (так)
-  :schedule(payment_id, ordered_at + 15 хв)>
-else (ні)
-endif
-if (збій запису в БД (REQ-06)?) then (так)
-  :rollback — нічого не збережено,
-  таймер не знайде payment;
-  :Refused(«Не вдалося оформити замовлення, спробуйте ще раз»)>
-  |Клієнт|
-  stop
-else (ні)
+  if (Клієнт натискає «Підтвердити»?) then (ні, закриває форму)
+    :нічого не створено;
+    stop
+  else (так)
+    :confirmOrder(customer_id, address_id,
+    payment_method, кошик)>
+  endif
   |Магазин|
-  :commit;
-endif
+  :перевірки в порядку REQ-22:
+  ліміт, форма, кошик;
+  if (виконалась умова відмови?) then (так)
+    :Refused(текст першої умови)>
+    note right
+      REQ-20 «Забагато замовлень, спробуйте за хвилину»
+      REQ-19 «Оберіть адресу й спосіб оплати»
+      REQ-08 «Кошик порожній»
+    end note
+  else (ні)
+    :транзакція: lockForUpdate товарів кошика;
+    if (бракує товару або сума 0.00?) then (так)
+      :rollback;
+      :Refused(текст першої умови)>
+      note right
+        REQ-07 «product_name: доступно stock_quantity шт.»
+        REQ-09 «Замовлення на 0.00 грн не оформлюється»
+      end note
+    else (ні)
+      :order (new), order_item, −stock_quantity,
+      payment (pending) — REQ-03-REQ-05;
+      if (payment_method = card?) then (так)
+        :schedule(payment_id, ordered_at + 15 хв)>
+      else (ні)
+      endif
+      if (збій запису в БД (REQ-06)?) then (так)
+        :rollback — нічого не збережено,
+        таймер не знайде payment;
+        :Refused>
+        note right: «Не вдалося оформити замовлення, спробуйте ще раз»
+      else (ні)
+        :commit;
+      endif
+    endif
+  endif
+repeat while (Refused?) is (так — форма лишається, enableConfirm) not (ні — замовлення створено)
+|Магазин|
 if (payment_method?) then (cash_on_delivery)
   fork
     :clearCart (REQ-17);
