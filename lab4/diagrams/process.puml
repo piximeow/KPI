@@ -75,7 +75,7 @@ else (card)
   fork
     :clearCart (REQ-17);
   fork again
-    :перенаправлення на шлюз
+    :перенаправлення Клієнта на шлюз
     (payment_id, payment_amount) (REQ-10)>
   end fork
 endif
