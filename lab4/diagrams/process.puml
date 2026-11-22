@@ -1,0 +1,90 @@
+@startuml process
+title Оформлення й оплата замовлення (UC2 + UC4)
+
+|Клієнт|
+start
+:натиснути «Оформити»;
+|Магазин|
+:знайти address цього customer;
+if (є хоча б одна address?) then (ні)
+  :відмова «Додайте адресу доставки в профілі»>
+  |Клієнт|
+  stop
+else (так)
+  |Магазин|
+  :форма: address, card або cash_on_delivery>
+endif
+|Клієнт|
+:обрати address і спосіб оплати,
+натиснути «Підтвердити»;
+|Магазин|
+:перевірки в порядку REQ-22:
+ліміт, форма, кошик, залишок, сума;
+if (виконалась умова відмови?) then (так)
+  :відмова — повідомлення першої умови>
+  |Клієнт|
+  stop
+else (ні)
+endif
+|Магазин|
+:транзакція: order (new), order_item,
+−stock_quantity, payment (pending);
+if (збій БД?) then (так)
+  :rollback — нічого не збережено;
+  :відмова «Не вдалося оформити замовлення»>
+  |Клієнт|
+  stop
+else (ні)
+endif
+|Магазин|
+if (payment_method?) then (cash_on_delivery)
+  fork
+    :очистити кошик (REQ-17);
+  fork again
+    :номер замовлення order_id>
+  end fork
+  |Клієнт|
+  stop
+else (card)
+  |Магазин|
+  fork
+    :очистити кошик (REQ-17);
+  fork again
+    :перенаправлення на шлюз
+    (payment_id, payment_amount)>
+    |Платіжний шлюз|
+    :показати Клієнту сторінку оплати;
+  fork again
+    |Магазин|
+    :запустити таймер 15 хв від ordered_at;
+  end fork
+endif
+|Магазин|
+repeat
+  :подія: notifyPayment від шлюзу
+  або спрацювання таймера<
+  if (подія?) then (notifyPayment)
+    if (підпис дійсний?) then (ні)
+      :«відмова» шлюзу, дані без змін>
+    elseif (payment ще pending?) then (ні)
+      :«прийнято» шлюзу, дані без змін>
+    elseif (результат?) then (succeeded)
+      :payment → succeeded, paid_at,
+      order → paid;
+      :«прийнято» шлюзу>
+    else (failed)
+      :payment → failed, order → cancelled,
+      повернути stock_quantity;
+      :«прийнято» шлюзу>
+    endif
+  else (таймер)
+    if (payment ще pending?) then (так)
+      :payment → failed, order → cancelled,
+      повернути stock_quantity;
+    else (ні)
+      :нічого не змінювати;
+    endif
+  endif
+repeat while (таймер ще не спрацював?) is (так) not (ні)
+stop
+@enduml
