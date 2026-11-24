@@ -1,16 +1,16 @@
 @startuml components
 title Компонентна модель: оформлення й оплата замовлення (UC2 + UC4)
 skinparam componentStyle uml2
-skinparam nodesep 30
+skinparam nodesep 60
 skinparam ranksep 45
 
 actor "Клієнт" as Client
 component "Платіжний шлюз\n(зовнішня система)" as GW
-interface "IPaymentPage\nсторінка оплати" as IPage
+interface "IPaymentPage\nсторінка оплати\n(payment_id, payment_amount)" as IPage
 GW -up- IPage
 
 rectangle "Онлайн-магазин (межа системи)" {
-  interface "IPages\nформа, кошик, повідомлення" as IPages
+  interface "IPages\n«Оформити» · «Підтвердити»\nформа, кошик, повідомлення" as IPages
   interface "ICheckout\nopenCheckout → форма / NoAddress\nconfirmOrder → OrderCreated / Refused" as ICheckout
   interface "IPaymentNotify\nnotifyPayment → Accepted / Rejected" as INotify
   interface "ICheckoutService\nopenCheckout · confirmOrder" as ICS
@@ -32,7 +32,7 @@ rectangle "Онлайн-магазин (межа системи)" {
   component "ProductRepository\n(product)" as RP
   component "OrderRepository\n(order, order_item)" as RO
   component "PaymentRepository\n(payment)" as RPay
-  database "ShopDB\n(address, product, order,\norder_item, payment)" as DB
+  database "ShopDB\n(customer, address, product,\norder, order_item, payment)" as DB
 
   UI -up- IPages
   CAPI -up- ICheckout
@@ -48,14 +48,15 @@ rectangle "Онлайн-магазин (межа системи)" {
 }
 
 Client ..> IPages
+Client ..> IPage : HTTPS, дані картки
 UI ..> ICheckout : HTTPS
 UI ..> IPage : HTTPS, перехід на оплату
 GW ..> INotify : HTTPS, HMAC-SHA256
 
 CAPI ..> ICS
-WH ..> IEvents
-CS ..> ITimer
-TM ..> IEvents : onPaymentTimeout
+WH .[norank].> IEvents
+CS .[norank].> ITimer
+TM .[norank].> IEvents : onPaymentTimeout
 
 CS ..> IAddresses
 CS ..> IProducts
