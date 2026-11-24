@@ -2,25 +2,26 @@
 title Компонентна модель: оформлення й оплата замовлення (UC2 + UC4)
 skinparam componentStyle uml2
 skinparam nodesep 60
-skinparam ranksep 45
+skinparam ranksep 70
 
 actor "Клієнт" as Client
 component "Платіжний шлюз\n(зовнішня система)" as GW
-interface "IPaymentPage\nсторінка оплати\n(payment_id, payment_amount)" as IPage
-GW -up- IPage
+interface " " as IPage
+GW -up- IPage : IPaymentPage\nсторінка оплати\n(payment_id, payment_amount)
 
 rectangle "Онлайн-магазин (межа системи)" {
-  interface "IPages\n«Оформити» · «Підтвердити»\nформа, кошик, повідомлення" as IPages
-  interface "ICheckout\nopenCheckout → форма / NoAddress\nconfirmOrder → OrderCreated / Refused" as ICheckout
-  interface "IPaymentNotify\nnotifyPayment → Accepted / Rejected" as INotify
-  interface "ICheckoutService\nopenCheckout · confirmOrder" as ICS
-  interface "ITimer\nschedule" as ITimer
-  interface "IPaymentEvents\nnotifyPayment · onPaymentTimeout" as IEvents
-  interface "IAddresses\nfindByCustomer" as IAddresses
-  interface "IProducts\nlockForUpdate · decreaseStock\nincreaseStock" as IProducts
-  interface "IOrders\ncountOrderedSince · insertOrder\ninsertOrderItem · findByOrder\nupdateOrderStatus" as IOrders
-  interface "IPayments\ninsertPayment · findByIdForUpdate\nupdatePayment" as IPayments
-  interface "SQL" as ISQL
+  interface " " as IPages
+  interface " " as ICheckout
+  interface " " as INotify
+  interface " " as ICS
+  interface " " as ITimer
+  interface " " as INotif
+  interface " " as ITimeout
+  interface " " as IAddresses
+  interface " " as IProducts
+  interface " " as IOrders
+  interface " " as IPayments
+  interface " " as ISQL
 
   component "CheckoutUI\n(браузер)" as UI
   component "CheckoutAPI" as CAPI
@@ -34,29 +35,30 @@ rectangle "Онлайн-магазин (межа системи)" {
   component "PaymentRepository\n(payment)" as RPay
   database "ShopDB\n(customer, address, product,\norder, order_item, payment)" as DB
 
-  UI -up- IPages
-  CAPI -up- ICheckout
-  WH -up- INotify
-  CS -up- ICS
-  TM -up- ITimer
-  PS -up- IEvents
-  RA -up- IAddresses
-  RP -up- IProducts
-  RO -up- IOrders
-  RPay -up- IPayments
-  DB -up- ISQL
+  UI -up- IPages : IPages\n«Оформити» · «Підтвердити»\nформа, кошик, повідомлення
+  CAPI -up- ICheckout : ICheckout\nopenCheckout → форма / NoAddress\nconfirmOrder → OrderCreated / Refused
+  WH -up- INotify : IPaymentNotify\nnotifyPayment → Accepted / Rejected
+  CS -up- ICS : ICheckoutService\nopenCheckout · confirmOrder
+  TM -up- ITimer : ITimer\nschedule
+  PS -up- INotif : IPaymentNotifications\nnotifyPayment
+  PS -left- ITimeout : IPaymentTimeout\nonPaymentTimeout
+  RA -up- IAddresses : IAddresses\nfindByCustomer
+  RP -up- IProducts : IProducts\nlockForUpdate · decreaseStock\nincreaseStock
+  RO -up- IOrders : IOrders\ncountOrderedSince · insertOrder\ninsertOrderItem · findByOrder\nupdateOrderStatus
+  RPay -up- IPayments : IPayments\ninsertPayment · findByIdForUpdate\nupdatePayment
+  DB -up- ISQL : SQL
 }
 
-Client ..> IPages
+Client ..> IPages : HTTPS
 Client ..> IPage : HTTPS, дані картки
 UI ..> ICheckout : HTTPS
 UI ..> IPage : HTTPS, перехід на оплату
 GW ..> INotify : HTTPS, HMAC-SHA256
 
 CAPI ..> ICS
-WH .[norank].> IEvents
+WH .[norank].> INotif
 CS .[norank].> ITimer
-TM .[norank].> IEvents : onPaymentTimeout
+TM .[norank].> ITimeout
 
 CS ..> IAddresses
 CS ..> IProducts
