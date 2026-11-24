@@ -1,71 +1,77 @@
 @startuml components
 title Компонентна модель: оформлення й оплата замовлення (UC2 + UC4)
 skinparam componentStyle uml2
-skinparam nodesep 40
-skinparam ranksep 50
+skinparam nodesep 30
+skinparam ranksep 45
 
 actor "Клієнт" as Client
-node "Платіжний шлюз" as GW
+component "Платіжний шлюз\n(зовнішня система)" as GW
+interface "IPaymentPage\nсторінка оплати" as IPage
+GW -up- IPage
 
 rectangle "Онлайн-магазин (межа системи)" {
-  interface "ICheckout\nopenCheckout · confirmOrder" as ICheckout
+  interface "IPages\nформа, кошик, повідомлення" as IPages
+  interface "ICheckout\nopenCheckout → форма / NoAddress\nconfirmOrder → OrderCreated / Refused" as ICheckout
   interface "IPaymentNotify\nnotifyPayment → Accepted / Rejected" as INotify
-  interface "IOrderCreation\nfindAddresses · createOrder" as IOrder
-  interface "IPaymentEvents\nhandleNotification · onPaymentTimeout" as IEvents
+  interface "ICheckoutService\nopenCheckout · confirmOrder" as ICS
   interface "ITimer\nschedule" as ITimer
-  interface "IAddresses" as IAddresses
-  interface "IProducts" as IProducts
-  interface "IOrders" as IOrders
-  interface "IPayments" as IPayments
+  interface "IPaymentEvents\nnotifyPayment · onPaymentTimeout" as IEvents
+  interface "IAddresses\nfindByCustomer" as IAddresses
+  interface "IProducts\nlockForUpdate · decreaseStock\nincreaseStock" as IProducts
+  interface "IOrders\ncountOrderedSince · insertOrder\ninsertOrderItem · findByOrder\nupdateOrderStatus" as IOrders
+  interface "IPayments\ninsertPayment · findByIdForUpdate\nupdatePayment" as IPayments
   interface "SQL" as ISQL
 
   component "CheckoutUI\n(браузер)" as UI
-
   component "CheckoutAPI" as CAPI
   component "PaymentWebhook" as WH
-  CAPI -up- ICheckout
-  WH -up- INotify
-
   component "CheckoutService" as CS
-  component "PaymentService" as PS
   component "PaymentTimer" as TM
-  CS -up- IOrder
-  PS -up- IEvents
-  TM -up- ITimer
-
-  component "CustomerRepository\n(customer, address)" as RC
+  component "PaymentService" as PS
+  component "AddressRepository\n(address)" as RA
   component "ProductRepository\n(product)" as RP
   component "OrderRepository\n(order, order_item)" as RO
   component "PaymentRepository\n(payment)" as RPay
-  RC -up- IAddresses
+  database "ShopDB\n(address, product, order,\norder_item, payment)" as DB
+
+  UI -up- IPages
+  CAPI -up- ICheckout
+  WH -up- INotify
+  CS -up- ICS
+  TM -up- ITimer
+  PS -up- IEvents
+  RA -up- IAddresses
   RP -up- IProducts
   RO -up- IOrders
   RPay -up- IPayments
-
-  database "ShopDB\n(таблиці lab1)" as DB
   DB -up- ISQL
 }
 
-Client --> UI
+Client ..> IPages
 UI ..> ICheckout : HTTPS
-UI ..> GW : перехід на сторінку оплати
+UI ..> IPage : HTTPS, перехід на оплату
 GW ..> INotify : HTTPS, HMAC-SHA256
 
-CAPI ..> IOrder
+CAPI ..> ICS
 WH ..> IEvents
 CS ..> ITimer
-TM ..> IEvents
+TM ..> IEvents : onPaymentTimeout
 
 CS ..> IAddresses
 CS ..> IProducts
 CS ..> IOrders
 CS ..> IPayments
-PS ..> IOrders
 PS ..> IPayments
+PS ..> IOrders
 PS ..> IProducts
 
-RC ..> ISQL
+RA ..> ISQL
 RP ..> ISQL
 RO ..> ISQL
 RPay ..> ISQL
+
+CAPI -[hidden]right- WH
+CS -[hidden]right- TM
+TM -[hidden]right- PS
+PS -[hidden]down- IAddresses
 @enduml
