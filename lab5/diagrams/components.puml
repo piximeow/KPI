@@ -1,0 +1,71 @@
+@startuml components
+title Компонентна модель: оформлення й оплата замовлення (UC2 + UC4)
+skinparam componentStyle uml2
+skinparam nodesep 40
+skinparam ranksep 50
+
+actor "Клієнт" as Client
+node "Платіжний шлюз" as GW
+
+rectangle "Онлайн-магазин (межа системи)" {
+  interface "ICheckout\nopenCheckout · confirmOrder" as ICheckout
+  interface "IPaymentNotify\nnotifyPayment → Accepted / Rejected" as INotify
+  interface "IOrderCreation\nfindAddresses · createOrder" as IOrder
+  interface "IPaymentEvents\nhandleNotification · onPaymentTimeout" as IEvents
+  interface "ITimer\nschedule" as ITimer
+  interface "IAddresses" as IAddresses
+  interface "IProducts" as IProducts
+  interface "IOrders" as IOrders
+  interface "IPayments" as IPayments
+  interface "SQL" as ISQL
+
+  component "CheckoutUI\n(браузер)" as UI
+
+  component "CheckoutAPI" as CAPI
+  component "PaymentWebhook" as WH
+  CAPI -up- ICheckout
+  WH -up- INotify
+
+  component "CheckoutService" as CS
+  component "PaymentService" as PS
+  component "PaymentTimer" as TM
+  CS -up- IOrder
+  PS -up- IEvents
+  TM -up- ITimer
+
+  component "CustomerRepository\n(customer, address)" as RC
+  component "ProductRepository\n(product)" as RP
+  component "OrderRepository\n(order, order_item)" as RO
+  component "PaymentRepository\n(payment)" as RPay
+  RC -up- IAddresses
+  RP -up- IProducts
+  RO -up- IOrders
+  RPay -up- IPayments
+
+  database "ShopDB\n(таблиці lab1)" as DB
+  DB -up- ISQL
+}
+
+Client --> UI
+UI ..> ICheckout : HTTPS
+UI ..> GW : перехід на сторінку оплати
+GW ..> INotify : HTTPS, HMAC-SHA256
+
+CAPI ..> IOrder
+WH ..> IEvents
+CS ..> ITimer
+TM ..> IEvents
+
+CS ..> IAddresses
+CS ..> IProducts
+CS ..> IOrders
+CS ..> IPayments
+PS ..> IOrders
+PS ..> IPayments
+PS ..> IProducts
+
+RC ..> ISQL
+RP ..> ISQL
+RO ..> ISQL
+RPay ..> ISQL
+@enduml
