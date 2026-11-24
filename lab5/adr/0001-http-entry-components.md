@@ -20,8 +20,9 @@ Chosen option: A, бо мережею до сервера доступні ли�
 
 ### Consequences
 
-* Good, бо `onPaymentTimeout` недосяжний ні з браузера, ні зі шлюзу: `IPaymentEvents` кличуть лише `PaymentWebhook` і `PaymentTimer`.
+* Good, бо `onPaymentTimeout` недосяжний ні з браузера, ні зі шлюзу: `PaymentWebhook` залежить лише від `IPaymentNotifications`, а `IPaymentTimeout` використовує тільки `PaymentTimer` — це видно з діаграми.
 * Good, бо шари діаграми однозначні: UI → API → сервіси → Data Access → БД.
+* Bad, бо `ICheckoutService` повторює операції `ICheckout`: `CheckoutAPI` лише передає виклик.
 * Bad, бо в lab3 цих компонентів немає, а в lab4 вони не виділені з доріжки «Магазин» — в `audit.md` позначені як нові.
 
 ## Pros and Cons of the Options
@@ -32,4 +33,4 @@ Chosen option: A, бо мережею до сервера доступні ли�
 
 ### B. Сервіси напряму
 * Good, бо сервіси й таймер, як у lab3, — без проміжного шару.
-* Bad, бо `IPaymentEvents` з `onPaymentTimeout` став би доступним шлюзу по мережі.
+* Bad, бо `onPaymentTimeout` `PaymentService` став би доступним шлюзу по мережі.
